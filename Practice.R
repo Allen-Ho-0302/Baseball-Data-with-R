@@ -92,12 +92,12 @@ pitching[1,]
 pos=order(pitching$FIP)
 head(pitching[pos, c('ER','FIP')])
 
-pcb=subset(pitching, teamID=='PH1'| teamID=='CL1'| teamID=='BS1')
-pcb$teamID=factor(pcb$teamID, levels=c('PH1','CL1'))
-by(pcb[,c('W','L','G')], pcb$teamID, summary)
-pcb.10=subset(pcb, W>10)
+#pcb=subset(pitching, teamID=='PH1'| teamID=='CL1'| teamID=='BS1')
+##pcb$teamID=factor(pcb$teamID, levels=c('PH1','CL1'))
+#by(pcb[,c('W','L','G')], pcb$teamID, summary)
+#pcb.10=subset(pcb, W>10)
 
-rbind(pitching, batting)
+#rbind(pitching, batting)
 merge(pitching, batting, by='teamID')
 
 install.packages('Lahman')
@@ -161,7 +161,7 @@ hist(HR.500$Career.HR, xlab='HR', main='', breaks=seq(500, 800, by=50))
 
 with(HR.500, plot(AB, HR))
 with(HR.500, lines(lowess(AB, HR, f=0.3))) 
-with(HR.500, identify(AB, HR, labels=playerID, n=3))
+#with(HR.500, identify(AB, HR, labels=playerID, n=3))
 
 with(HR.500, plot(AB, HR, xlim=c(0,650), ylim=c(0,60),
                   pch=19, xlab='At Bat', ylab='Home Run'))
@@ -428,3 +428,99 @@ with(runs400, plot(Runs.Start, Runs, type='n'))
 with(runs400, lines(lowess(Runs.Start, Runs)))
 abline(h=0)
 with(runs400, text(Runs.Start, Runs, position))
+AP=subset(runs400, Batter==albert.id)
+points(AP$Runs.Start, AP$Runs, pch=19, cex=3)
+
+
+
+d.homerun=subset(data2011, EVENT_CD==23)
+table(d.homerun$STATE)
+round(prop.table(table(d.homerun$STATE)), 3)
+library(MASS)
+truehist(d.homerun$RUNS.VALUE)
+subset(d.homerun, RUNS.VALUE==max(RUNS.VALUE))[1, c('STATE', 'NEW.STATE', 'RUNS.VALUE')]
+mean.HR=mean(d.homerun$RUNS.VALUE)
+abline(v=mean.HR, lwd=3)
+text(1.5, 5, 'Mean Run Value', pos=4)
+
+
+
+d.single=subset(data2011, EVENT_CD==20)
+truehist(d.single$RUNS.VALUE)
+table(d.single$STATE)
+subset(d.single, RUNS.VALUE==max(RUNS.VALUE))[, c('STATE', 'NEW.STATE', 'RUNS.VALUE')]
+subset(d.single, RUNS.VALUE==min(RUNS.VALUE))[, c('STATE', 'NEW.STATE', 'RUNS.VALUE')]
+mean.single=mean(d.single$RUNS.VALUE)
+abline(v=mean.single, lwd=3)
+text(0.5, 5, 'Mean Run Value', pos=4)
+
+
+
+stealing=subset(data2011, EVENT_CD==6|EVENT_CD==4)
+table(stealing$EVENT_CD)
+table(stealing$STATE)
+truehist(stealing$RUNS.VALUE)
+stealing.1001=subset(stealing, STATE=='100 1')
+table(stealing.1001$EVENT_CD)
+with(stealing.1001, table(NEW.STATE))
+mean(stealing.1001$RUNS.VALUE)
+mean(stealing$RUNS.VALUE)
+
+
+load("C:/Users/allen/Desktop/R/balls_strikes_count.RData")
+library(lattice)
+verlander
+sampleRows=sample(1:nrow(verlander), 20)
+str(sampleRows)
+verlander[sampleRows, ]
+histogram(~speed, data=verlander)
+densityplot(~speed, data=verlander, plot.points=FALSE)
+densityplot(~speed|pitch_type, data=verlander, plot.points=FALSE, layout=c(1,5))
+densityplot(~speed, data=verlander, groups=pitch_type, plot.points=FALSE, auto.key=TRUE)
+F4verl=subset(verlander, pitch_type=='FF')
+F4verl$gameDay=as.integer(format(F4verl$gamedate, format='%j'))
+dailySpeed=aggregate(speed~season+gameDay, data=F4verl, FUN=mean)
+xyplot(speed~gameDay|factor(season), data=dailySpeed, xlab='day of the year', ylab='pitch speed (mph)')
+xyplot(speed~gameDay, groups=season, data=dailySpeed)
+speedFC=subset(verlander, pitch_type %in% c('FF', 'CH'))
+avgspeedFC=aggregate(speed~pitch_type+season, data=speedFC, FUN=mean)
+str(avgspeedFC)
+droplevels(avgspeedFC)
+dotplot(factor(season)~speed, groups=pitch_type, data=avgspeedFC, pch=c('C', 'F'), cex=2)
+avgSpeed=aggregate(speed~season+pitches, data=F4verl, FUN=mean)
+avgSpeedComb=mean(F4verl$speed)
+xyplot(speed~pitches|factor(season), data=avgSpeed, 
+  panel=function(...){
+  panel.xyplot(...)
+  panel.abline(v=100, lty='dotted')
+  panel.abline(h=avgSpeedComb)
+  panel.text(25, 100, 'avg. speed')
+  panel.arrows(25, 99.5, 0, avgSpeedComb, length=0.1)
+})
+
+
+
+NoHit=subset(verlander, gamedate=='2011-05-07')
+pitchnames=c('Changeup', 'Curveball', '4S-Fastball', '2S-Fastball', 'Slider')
+myKey=list(space='right',
+           border=TRUE,
+           title='pitch type',
+           cex.title=1.5,
+           text=pitchnames,
+           padding.text=4)
+topKzone=3.5
+botKzone=1.6
+inKzone=-0.95
+outKzone=0.95
+xyplot(pz~px|batter_hand, groups=pitch_type, data=NoHit, auto.key=myKey, 
+       aspect='iso',
+       xlim=c(-2.2, 2.2),
+       ylim=c(0, 5),
+       xlab='Horizontal location\n(ft. from middle of plate)',
+       ylab='Vertical location\n(ft. from ground)',
+       panel=function(...){
+         panel.xyplot(...)
+         panel.rect(inKzone, botKzone, outKzone, topKzone, border='black', lty=3)
+       })
+
+
