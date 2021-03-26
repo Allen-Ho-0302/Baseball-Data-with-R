@@ -524,3 +524,30 @@ xyplot(pz~px|batter_hand, groups=pitch_type, data=NoHit, auto.key=myKey,
        })
 
 
+
+sampleRows=sample(1:nrow(cabrera), 20)
+cabrera[sampleRows,]
+library(ggplot2)
+p0=ggplot(data=cabrera, aes(x=hitx, y=hity))
+p0
+p1=p0+geom_point(aes(color=hit_outcome))
+p1
+p2=p1+coord_equal()
+p2
+p3=p2+facet_wrap(~season)
+p3
+bases=data.frame(x=c(0, 90/sqrt(2), 0, -90/sqrt(2), 0),
+                 y=c(0, 90/sqrt(2), 2*90/sqrt(2), 90/sqrt(2), 0))
+p4=p3+geom_path(data=bases, aes(x=x, y=y))
+p4
+p5=p4+geom_segment(x=0, xend=300, y=0, yend=300)+
+  geom_segment(x=0, xend=-300, y=0, yend=300)
+p5
+
+cabreraStretch=subset(cabrera, gamedate>'2012-08-31')
+p0=ggplot(data=cabreraStretch, aes(x=hitx, y=hity))
+p1=p0+geom_point(aes(shape=hit_outcome, colour=pitch_type, size=speed))
+p2=p1+coord_equal()
+p3=p2+geom_path(data=bases, aes(x=x, y=y))
+p4=p3+guides(col=guide_legend(ncol=2))
+p4+geom_segment(x=0, xend=300, y=0, yend=300)+geom_segment(x=0, xend=-300, y=0, yend=300)
