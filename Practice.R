@@ -467,6 +467,7 @@ mean(stealing.1001$RUNS.VALUE)
 mean(stealing$RUNS.VALUE)
 
 
+
 load("C:/Users/allen/Desktop/R/balls_strikes_count.RData")
 library(lattice)
 verlander
@@ -529,17 +530,12 @@ sampleRows=sample(1:nrow(cabrera), 20)
 cabrera[sampleRows,]
 library(ggplot2)
 p0=ggplot(data=cabrera, aes(x=hitx, y=hity))
-p0
 p1=p0+geom_point(aes(color=hit_outcome))
-p1
 p2=p1+coord_equal()
-p2
 p3=p2+facet_wrap(~season)
-p3
 bases=data.frame(x=c(0, 90/sqrt(2), 0, -90/sqrt(2), 0),
                  y=c(0, 90/sqrt(2), 2*90/sqrt(2), 90/sqrt(2), 0))
 p4=p3+geom_path(data=bases, aes(x=x, y=y))
-p4
 p5=p4+geom_segment(x=0, xend=300, y=0, yend=300)+
   geom_segment(x=0, xend=-300, y=0, yend=300)
 p5
@@ -551,3 +547,37 @@ p2=p1+coord_equal()
 p3=p2+geom_path(data=bases, aes(x=x, y=y))
 p4=p3+guides(col=guide_legend(ncol=2))
 p4+geom_segment(x=0, xend=300, y=0, yend=300)+geom_segment(x=0, xend=-300, y=0, yend=300)
+
+ggplot(data=F4verl, aes(pitches, speed))+
+  facet_wrap(~season)+
+  geom_point(data=F4verl[sample(1:nrow(F4verl), 1000),], aes(pitches, speed))+
+  geom_smooth(col='black')+
+  geom_vline(aes(xintercept=100), col='black', lty=2)+
+  geom_hline(aes(yintercept=avgSpeedComb), lty=3)
+
+kZone=data.frame(
+  x=c(inKzone, inKzone, outKzone, outKzone, inKzone),
+  y=c(botKzone, topKzone, topKzone, botKzone, botKzone)
+)
+ggplot(data=F4verl, aes(px, pz))+
+  geom_point()+
+  facet_wrap(~batter_hand)+
+  coord_equal()+
+  geom_path(data=kZone, aes(x, y), lwd=2, col='white', alpha=0.3)
+
+install.packages('hexbin')
+library(hexbin)
+ggplot(data=F4verl, aes(px, pz))+
+  stat_binhex()+
+  facet_wrap(~batter_hand)+
+  coord_equal()+
+  geom_path(data=kZone, aes(x, y), lwd=2, col='white', alpha=0.3)  
+
+library(jpeg)
+diamond=readJPEG('Comerica.jpg')
+ggplot(data=cabrera, aes(hitx, hity))+
+  coord_equal()+
+  annotation_raster(diamond, -310, 305, -100, 480)+
+  stat_binhex(alpha=0.9, binwidth=c(5, 5))+
+  scale_fill_gradient(low='grey70', high='black')
+
