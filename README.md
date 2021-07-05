@@ -1,1 +1,1 @@
-practice baseball data with R
+Self practice with the book: "Baseball Data with R"
